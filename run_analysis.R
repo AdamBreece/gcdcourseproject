@@ -39,6 +39,14 @@ testFrame <- read.table(xTestPath, col.names=featureNames)
 mergedData <- rbindlist(list(trainFrame, testFrame))	# returns data.table
 setnames(mergedData, featureNames)
 
+## Step 2: Extract only the measurements on the mean and 
+## 			 standard deviation for each measurement.
+
+# Find column names missing -mean() or -std(), and remove them
+# Note: this includes removing meanfreq() columns.
+removeThese <- grep("(-mean\\(\\)|-std\\(\\))", names(mergedData), invert=T)
+mergedData[,c(removeThese) := NULL]
+
 # use data.table to join activity labels to activities
 activities <- rbind(fread(yTrainPath), fread(yTestPath))
 setkey(activities,V1)
@@ -49,8 +57,6 @@ subjects <- rbind(fread(subTrainPath), fread(subTestPath))
 mergedData[, activity := activities[,V2]]
 mergedData[, subject.id := subjects]
 
-## Step 4 (was 2): Extract only the measurements on the mean and 
-## 			 standard deviation for each measurement.
 
 # Assumed to mean only use measurements with -mean() and -std() in their name
 # in the tidy data set
