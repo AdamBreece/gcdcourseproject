@@ -1,9 +1,9 @@
 # Load required libraries here
-library(data.table)
 library(plyr)
+library(reshape2)
+library(data.table)
 
-# File paths
-# Assumes working directory has "UCI HAR Dataset" directory which
+# File paths assume working directory has "UCI HAR Dataset" directory which
 # contains the dataset.
 
 dataDir <- "UCI HAR Dataset"
@@ -19,14 +19,15 @@ yTestPath <- paste(dataDir, "test/y_test.txt", sep = "/")
 subTestPath <- paste(dataDir, "test/subject_test.txt", sep = "/")
 
 #### PART 1: Create a merged, cleaned data set ####
-print("Reading dataset, this may take a bit...")
+print("Reading UCI HAR dataset, this may take a bit...")
 
 ## Step 0: Read and prep metadata
 
 featureNames <- as.character(read.table(featuresPath)[,2])
 actLabels <- fread(labelPath)
-setkey(actLabels, V1)
-actLabels[,V2 := factor(actLabels[,V2])]
+setnames(actLabels, c("activity.id", "activity"))
+setkey(actLabels, activity.id)
+actLabels[,activity := factor(actLabels[,activity])]
 
 ## Step 1: Merge the training and the test sets to create one data set.
 
@@ -41,6 +42,7 @@ setnames(mergedData, featureNames)
 
 ## Step 2: Extract only the measurements on the mean and 
 ## 			 standard deviation for each measurement.
+print("Extracting mean() and std() features...")
 
 # Find column names missing -mean() or -std(), and remove them.
 # Note: columns with meanfreq() are NOT kept.
@@ -48,18 +50,36 @@ setnames(mergedData, featureNames)
 removeThese <- grep("(-mean\\(\\)|-std\\(\\))", names(mergedData), invert=T)
 mergedData[,c(removeThese) := NULL]
 
-# use data.table to join activity labels to activities
 activities <- rbind(fread(yTrainPath), fread(yTestPath))
-setkey(activities,V1)
-activities <- activities[actLabels]
+subjects <- (rbind(fread(subTrainPath), fread(subTestPath)))
 
-subjects <- rbind(fread(subTrainPath), fread(subTestPath))
-
-mergedData[, activity := activities[,V2]]
+print("Adding activity and subject.id columns...")
+mergedData[, activity.id := activities]
 mergedData[, subject.id := subjects]
 
-# Assumed to mean only use measurements with -mean() and -std() in their name
-# in the tidy data set
+# use data.table to join activity labels to activities column
+print("Labeling activities...")
+setkey(mergedData,activity.id)
+mergedData <- mergedData[actLabels]
+mergedData[,activity.id := NULL]
 
-# Creates a second, independent tidy data set with the average of each variable
-# for each activity and each subject. 
+print("Done merging and cleaning. Merged dataset available as data.table mergedData")
+
+#### PART 1: Create second, independent tidy data set with the average 
+####         of each variable for each activity and each subject.
+
+print("Creating independent tidy data set with mean of each variable for each activity and subject...")
+
+melted <- data.table:::melt.data.table(mergedData, id.vars=c("activity","subject.id"))
+tidyData <- data.table::dcast.data.table(melted, activity + subject.id ~ variable, mean)
+
+print("Tidy dataset available as data.table tidyData")
+
+print("Saving tidy dataset as tidy.csv")
+write.csv(tidyData,file="tidy.csv")
+
+# 
+
+## should return 53
+## length(mergedData[activity.id == 5 & subject.id == 1, activity.id])
+## length(mergedData[activity == "STANDING" & subject.id == 1, activity.id])
