@@ -1,10 +1,10 @@
 # Load required libraries here
-library(plyr)
+# library(plyr)
 library(reshape2)
 library(data.table)
 
 # File paths assume working directory has "UCI HAR Dataset" directory which
-# contains the dataset.
+# contains the unzipped dataset.
 
 dataDir <- "UCI HAR Dataset"
 featuresPath <- paste(dataDir, "features.txt", sep = "/")
