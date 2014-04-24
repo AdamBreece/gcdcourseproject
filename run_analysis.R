@@ -75,8 +75,8 @@ tidyData <- data.table::dcast.data.table(melted, activity + subject.id ~ variabl
 
 print("Tidy dataset available as data.table tidyData")
 
-print("Saving tidy dataset as tidy.csv")
-write.csv(tidyData,file="tidy.csv")
+print("Saving tidy dataset as tidy.txt")
+write.table(tidyData,file="tidy.txt")
 
 # 
 

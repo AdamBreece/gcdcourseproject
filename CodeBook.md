@@ -20,11 +20,11 @@ Requires the data.table (version 1.9.2) and reshape2 R packages.
 ## Outputs and Variables
 - `mergedData` - A data.table containing the merged and cleaned data set.
 - `tidyData` - A data.table with the average (mean) value of the mean and standard deviation of each measurement, for each subject and activity.
-- `tidy.csv` - A CSV file containing tidyData.
+- `tidy.txt` - A text file containing tidyData.
 
 ## Details
 
-The script performs the steps below to produce a tidy data set with the mean of each std() and mean() feature for each activity and subject, and writes that to the CSV file tidy.csv.
+The script performs the steps below to produce a tidy data set with the mean of each std() and mean() feature for each activity and subject, and writes that to the file tidy.txt.
 
 After running, the merged data can be referenced through the `mergedData` variable, and the summary data through the `tidyData` variable, both of which are of type data.table.
 
@@ -44,4 +44,4 @@ After running, the merged data can be referenced through the `mergedData` variab
 
 1. Melts `mergedData` using the activity and subject.id columns for id variables.
 1. Casts the molten data, by activity and subject.id, using mean as the aggregate function. The result of this cast operation is stored in the data.table variable `tidyData`.
-1. Writes the cast summary data to tidy.csv.
+1. Writes the cast summary data to tidy.txt in the current working directory.
